@@ -169,7 +169,7 @@ class LlamaCppLLM:
         first real turn only pays for the caller's words. On CPU this is the difference
         between a ~12 s and a ~1-2 s first response."""
         prefix = render_chatml(messages or [Message("system", "")], tools or [])
-        prefix = prefix.rsplit("<|im_start|>assistant", 1)[0] + "<|im_start|>user\n"
+        prefix = prefix.removesuffix("<|im_start|>assistant\n") + "\n<|im_start|>user\n"
         async with self._lock:
             await asyncio.to_thread(self._llm.create_completion, prefix, max_tokens=1)
 

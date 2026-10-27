@@ -1,0 +1,192 @@
+# Scripted multilingual conversations for the clinic receptionist.
+#
+# Fixed clock: today is Tuesday 2026-10-27 (tomorrow = 2026-10-28), so the deterministic
+# clinic store always has the same free slots.
+#
+# Per turn:
+#   lang          expected language of the caller (ar | fr | en); also the expected reply language
+#   tools         expected tool calls; [] means "must not call any tool"; omit = not checked
+#                 args are compared after domain normalisation (dates, times, refs, specialties);
+#                 a list of values means "any of"
+#   any_of_tools  alternative: at least one call with one of these names
+#   answer_any    the reply must contain one of these (normalised, case-insensitive) ...
+#   answer_none   ... and none of these. Clinic facts are in the system prompt, so FAQ
+#                 turns expect no tool call and are graded on the answer instead.
+#   voice         edge-tts voice used to synthesise the audio fixture (different speakers from
+#                 the agent's own voices, including a Tunisian and an Emirati voice)
+# Per scenario:
+#   success       final state checks on the clinic store
+
+today: 2026-10-27
+
+scenarios:
+  # ------------------------------------------------------------------ English
+  - id: en_book_dentist
+    turns:
+      - user: "Hi, I'd like to see a dentist tomorrow morning."
+        lang: en
+        voice: en-GB-RyanNeural
+        tools: [{name: find_slots, args: {specialty: dentist, date: "2026-10-28"}}]
+      - user: "Eleven is perfect. My name is Sara Haddad and my phone number is 055 512 3456."
+        lang: en
+        voice: en-GB-RyanNeural
+        tools: [{name: book_appointment, args: {specialty: dentist, date: "2026-10-28", time: "11:00"}}]
+    success: {booking: {name_contains: Haddad, specialty: dentist, time: "11:00"}}
+
+  - id: en_lookup
+    turns:
+      - user: "Can you check my booking please? The reference is 1003."
+        lang: en
+        voice: en-IN-PrabhatNeural
+        tools: [{name: get_appointment, args: {booking_ref: "1003"}}]
+
+  - id: en_hours
+    turns:
+      - user: "What are your opening hours on Saturday?"
+        lang: en
+        voice: en-US-GuyNeural
+        tools: []
+        answer_any: ["9", "nine", "5 pm", "five", "17"]
+
+  - id: en_unavailable_time
+    turns:
+      - user: "Book me with the dentist tomorrow at ten a.m. I'm Omar Khalid, phone 050 123 4567."
+        lang: en
+        voice: en-GB-RyanNeural
+        any_of_tools: [book_appointment, find_slots]
+    success: {no_new_booking: true}
+
+  - id: en_out_of_domain
+    turns:
+      - user: "Can you tell me who won the football match yesterday?"
+        lang: en
+        voice: en-US-GuyNeural
+        tools: []
+
+  # ------------------------------------------------------------------- French
+  - id: fr_book_pediatrics
+    turns:
+      - user: "Bonjour, je voudrais un rendez-vous chez le pédiatre demain après-midi."
+        lang: fr
+        voice: fr-FR-HenriNeural
+        tools: [{name: find_slots, args: {specialty: pediatrics, date: "2026-10-28"}}]
+      - user: "Quinze heures, c'est parfait. Je m'appelle Claire Martin, mon numéro est le 06 12 34 56 78."
+        lang: fr
+        voice: fr-FR-HenriNeural
+        tools: [{name: book_appointment, args: {specialty: pediatrics, date: "2026-10-28", time: "15:00"}}]
+    success: {booking: {name_contains: Martin, specialty: pediatrics, time: "15:00"}}
+
+  - id: fr_cancel
+    turns:
+      - user: "Je voudrais annuler mon rendez-vous, le numéro 1002."
+        lang: fr
+        voice: fr-CA-AntoineNeural
+        tools: [{name: cancel_appointment, args: {booking_ref: "1002"}}]
+    success: {cancelled: "1002"}
+
+  - id: fr_insurance
+    turns:
+      - user: "Est-ce que vous acceptez la CNAM ?"
+        lang: fr
+        voice: fr-FR-HenriNeural
+        tools: []
+        answer_any: ["oui", "acceptons"]
+        answer_none: ["n'acceptons", "ne prenons pas", "pas la cnam"]
+
+  - id: fr_price
+    turns:
+      - user: "Combien coûte une consultation chez le dermatologue ?"
+        lang: fr
+        voice: fr-CA-AntoineNeural
+        tools: []
+        answer_any: ["90", "quatre-vingt-dix"]
+
+  # ------------------------------------------------- Modern Standard Arabic
+  - id: ar_book_general
+    turns:
+      - user: "مرحبا، أريد موعدا عند الطبيب العام غدا صباحا."
+        lang: ar
+        voice: ar-SA-HamedNeural
+        tools: [{name: find_slots, args: {specialty: general, date: "2026-10-28"}}]
+      - user: "الساعة العاشرة مناسبة. اسمي أحمد بن علي ورقم هاتفي ٠٥٠١٢٣٤٥٦٧."
+        lang: ar
+        voice: ar-SA-HamedNeural
+        tools: [{name: book_appointment, args: {specialty: general, date: "2026-10-28", time: "10:00"}}]
+    success: {booking: {specialty: general, time: "10:00"}}
+
+  - id: ar_lookup
+    turns:
+      - user: "أريد أن أعرف تفاصيل موعدي، رقم الحجز ١٠٠١."
+        lang: ar
+        voice: ar-EG-ShakirNeural
+        tools: [{name: get_appointment, args: {booking_ref: "1001"}}]
+
+  - id: ar_address
+    turns:
+      - user: "ما هو عنوان العيادة؟"
+        lang: ar
+        voice: ar-SA-HamedNeural
+        tools: []
+        answer_any: ["بورقيبة", "bourguiba"]
+
+  # ------------------------------------------------ Tunisian Arabic (Derja)
+  - id: tn_hours
+    turns:
+      - user: "وقتاش تحلّو العيادة نهار السبت؟"
+        lang: ar
+        voice: ar-TN-HediNeural
+        tools: []
+        answer_any: ["التاسعة", "الخامسة", "9", "5", "17"]
+        answer_none: ["مغلق يوم السبت", "مغلقون يوم السبت"]
+
+  - id: tn_cancel
+    turns:
+      - user: "نحب نبطّل الموعد متاعي، النومرو ١٠٠٣."
+        lang: ar
+        voice: ar-TN-HediNeural
+        tools: [{name: cancel_appointment, args: {booking_ref: "1003"}}]
+    success: {cancelled: "1003"}
+
+  - id: tn_book_dentist
+    turns:
+      - user: "عسلامة، نحب موعد عند طبيب السنان غدوة العشية."
+        lang: ar
+        voice: ar-TN-ReemNeural
+        tools: [{name: find_slots, args: {specialty: dentist, date: "2026-10-28"}}]
+      - user: "الساعة جوج ونص باهي. إسمي سنية التريكي والنومرو متاعي ٢٢٣٣٤٤٥٥."
+        lang: ar
+        voice: ar-TN-ReemNeural
+        tools: [{name: book_appointment, args: {specialty: dentist, date: "2026-10-28", time: "14:30"}}]
+    success: {booking: {specialty: dentist, time: "14:30"}}
+
+  # ------------------------------------------------------------ Gulf Arabic
+  - id: gulf_parking
+    turns:
+      - user: "عندكم مواقف سيارات عند العيادة؟"
+        lang: ar
+        voice: ar-AE-HamdanNeural
+        tools: []
+        answer_any: ["مجاني", "مواقف", "موقف"]
+        answer_none: ["لا يوجد", "ليس لدينا", "لا تتوفر"]
+
+  # ------------------------------------------------ code-switching / switching
+  - id: mixed_fr_ar_cancel
+    turns:
+      - user: "Bonjour, je veux annuler le rendez-vous 1001 s'il vous plaît, شكرا."
+        lang: fr
+        voice: fr-FR-RemyMultilingualNeural
+        tools: [{name: cancel_appointment, args: {booking_ref: "1001"}}]
+    success: {cancelled: "1001"}
+
+  - id: switch_en_to_fr
+    turns:
+      - user: "Hello, are you open on Sundays?"
+        lang: en
+        voice: en-GB-RyanNeural
+        tools: []
+        answer_any: ["closed", "not open"]
+      - user: "Et le samedi, vous fermez à quelle heure ?"
+        lang: fr
+        voice: fr-FR-HenriNeural
+        tools: []
+        answer_any: ["17", "dix-sept", "cinq"]

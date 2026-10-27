@@ -30,7 +30,7 @@ def receive_until_turn_end(ws) -> tuple[list[dict], list[bytes]]:
 
 def test_text_and_voice_turns_over_websocket(settings: Settings) -> None:
     providers = Providers(
-        FakeSTT([Transcript("Are you open on Saturday? What are the hours?")]),
+        FakeSTT([Transcript("Is a dentist free tomorrow?")]),
         ScriptedLLM(),
         FakeTTS(),
     )
@@ -57,7 +57,7 @@ def test_text_and_voice_turns_over_websocket(settings: Settings) -> None:
         ws.send_bytes(silence(300) + tone(800) + silence(800))
         events, _ = receive_until_turn_end(ws)
         tool = next(e for e in events if e["type"] == "tool_call")
-        assert tool["name"] == "clinic_info"
+        assert tool["name"] == "find_slots"
 
         body = client.get("/api/metrics").json()
         assert body["summary"]["turns"] == 2

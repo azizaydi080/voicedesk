@@ -1,0 +1,8 @@
+title = "voicedesk"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic audio fixtures and lockfiles contain high-entropy bytes, not secrets"
+paths = ['''evals/audio/.*\.wav''', '''backend/uv\.lock''', '''frontend/package-lock\.json''']

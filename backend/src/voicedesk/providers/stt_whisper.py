@@ -60,16 +60,40 @@ class WhisperSTT:
         seconds = len(audio) / SAMPLE_RATE
         if seconds < 0.2:
             return Transcript("", None, None, seconds)
-        # One encoder pass for language ID + decoding in the common case. If Whisper picks a
-        # language we do not serve (Maghrebi Arabic is often labelled Maltese or Persian),
-        # re-decode forced to the most likely supported language.
-        text, info = self._decode(audio, None)
-        probs = dict(info.all_language_probs or [])
-        lang = info.language
-        if lang not in SUPPORTED_LANGUAGES:
-            lang = max(SUPPORTED_LANGUAGES, key=lambda code: probs.get(code, 0.0))
-            text, _ = self._decode(audio, lang)
-        return Transcript(text, lang, float(probs.get(lang, info.language_probability)), seconds)
+        if seconds > 29.0:  # beyond one Whisper window: use the regular long-form path
+            text, info = self._decode(audio, None)
+            return Transcript(text, info.language, info.language_probability, seconds)
+        return self._single_pass(audio, seconds)
+
+    def _single_pass(self, audio: np.ndarray, seconds: float) -> Transcript:
+        """Language ID and decoding from one encoder pass.
+
+        ``WhisperModel.transcribe(language=None)`` encodes the audio once to detect the
+        language and again to decode it; on CPU the encoder dominates, so this halves the
+        cost. Detection is restricted to the languages we serve, which also stops Maghrebi
+        Arabic from being labelled Maltese or Persian.
+        """
+        from faster_whisper.audio import pad_or_trim
+        from faster_whisper.tokenizer import Tokenizer
+
+        model = self._model
+        features = pad_or_trim(model.feature_extractor(audio))
+        encoded = model.encode(features)
+        probs = {tok[2:-2]: p for tok, p in model.model.detect_language(encoded)[0]}
+        lang = max(SUPPORTED_LANGUAGES, key=lambda code: probs.get(code, 0.0))
+        tokenizer = Tokenizer(model.hf_tokenizer, True, task="transcribe", language=lang)
+        previous = tokenizer.encode(" " + _PROMPTS[lang])
+        prompt = model.get_prompt(tokenizer, previous, without_timestamps=True)
+        result = model.model.generate(
+            encoded,
+            [prompt],
+            beam_size=self.beam_size,
+            max_length=224,
+            suppress_blank=True,
+            suppress_tokens=[-1],
+        )[0]
+        text = tokenizer.decode([t for t in result.sequences_ids[0] if t < tokenizer.eot])
+        return Transcript(text.strip(), lang, float(probs.get(lang, 0.0)), seconds)
 
     def _decode(self, audio: np.ndarray, language: str | None) -> tuple[str, Any]:
         segments, info = self._model.transcribe(

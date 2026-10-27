@@ -61,7 +61,7 @@ class Settings(BaseSettings):
 
     # --- domain / storage ---------------------------------------------------
     clinic_today: date | None = None
-    metrics_path: Path = Path("data/metrics.jsonl")
+    metrics_path: Path = Path("data/metrics.sqlite")
     cors_origins: list[str] = ["http://localhost:3000"]
 
 

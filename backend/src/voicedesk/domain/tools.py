@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from voicedesk.domain.clinic import SPECIALTIES, ClinicStore, ToolError
-from voicedesk.domain.faq import search_faq
 from voicedesk.providers.base import Language, ToolCall, ToolSpec
 
 _SPECIALTY = {"type": "string", "enum": list(SPECIALTIES), "description": "Medical specialty."}
@@ -61,15 +60,6 @@ TOOL_SPECS: list[ToolSpec] = [
             "required": ["booking_ref"],
         },
     ),
-    ToolSpec(
-        "clinic_info",
-        "Practical questions: opening hours, address, prices, insurance, documents, parking.",
-        {
-            "type": "object",
-            "properties": {"question": {"type": "string"}},
-            "required": ["question"],
-        },
-    ),
 ]
 
 
@@ -111,8 +101,6 @@ class ToolRunner:
                     out = self.store.get(str(a["booking_ref"]))
                 case "cancel_appointment":
                     out = self.store.cancel(str(a["booking_ref"]))
-                case "clinic_info":
-                    out = search_faq(str(a["question"]), language)
                 case _:
                     raise ToolError(f"Unknown tool '{call.name}'.")
             ok = True

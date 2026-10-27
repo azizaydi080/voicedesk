@@ -9,7 +9,16 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-STAGES = ("stt_ms", "llm_ttft_ms", "tool_ms", "tts_ttfb_ms", "ttfa_ms", "client_ttfa_ms", "turn_ms")
+STAGES = (
+    "stt_ms",
+    "llm_ttft_ms",
+    "tool_ms",
+    "tts_ttfb_ms",
+    "tts_first_chunk_ms",
+    "ttfa_ms",
+    "client_ttfa_ms",
+    "turn_ms",
+)
 
 
 @dataclass
@@ -37,6 +46,7 @@ class TurnMetrics:
     llm_total_ms: float | None = None
     tool_ms: float | None = None
     tts_ttfb_ms: float | None = None
+    tts_first_chunk_ms: float | None = None  # full synthesis of the first chunk
     ttfa_ms: float | None = None
     client_ttfa_ms: float | None = None
     turn_ms: float | None = None

@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 1" # weekly agent evals against the local model
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true, python-version: "3.12" }
+      - run: uv sync --frozen
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - run: uv run mypy src
+      - run: uv run pytest -q --cov=voicedesk --cov-report=term-missing
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # Speech understanding gate: real faster-whisper on the committed audio fixtures.
+  evals-stt:
+    runs-on: ubuntu-latest
+    needs: backend
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true, python-version: "3.12" }
+      - uses: actions/cache@v4
+        with: { path: ~/.cache/huggingface, key: whisper-small }
+      - run: uv sync --frozen --extra whisper
+      - run: uv run python -m voicedesk.evals run --mode audio --stage stt --min-score 0.95 --tag ci
+      - uses: actions/upload-artifact@v4
+        with: { name: evals-stt, path: evals/results/audio-stt-ci.* }
+
+  # Agent gate: the real local LLM on all scripted conversations. Slow on CPU runners,
+  # so it runs on demand, weekly, and when agent code changes.
+  evals-agent:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'evals')
+    runs-on: ubuntu-latest
+    needs: backend
+    timeout-minutes: 60
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true, python-version: "3.12" }
+      - uses: actions/cache@v4
+        with: { path: .local/models, key: gguf-qwen2.5-1.5b-q4km }
+      - run: ../scripts/fetch_local_llm.sh
+      - run: uv sync --frozen --extra local-llm
+      - run: uv run python -m voicedesk.evals run --mode text --tag ci --min-score 0.5
+      - uses: actions/upload-artifact@v4
+        with: { name: evals-agent, path: evals/results/text-all-ci.* }

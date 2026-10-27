@@ -96,8 +96,6 @@ class ScriptedLLM:
                 call = ToolCall(
                     uuid.uuid4().hex[:8], "find_slots", {"specialty": "dentist", "date": "tomorrow"}
                 )
-            elif tools and ("open" in text or "hours" in text):
-                call = ToolCall(uuid.uuid4().hex[:8], "clinic_info", {"question": text})
             if call:
                 yield ToolCallsReady([call])
                 yield LLMDone(len(text), 0, 0)

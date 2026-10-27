@@ -7,7 +7,7 @@ from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import date
 
-from voicedesk.agent.prompts import language_note, system_prompt
+from voicedesk.agent.prompts import few_shot_messages, language_note, system_prompt
 from voicedesk.domain.tools import TOOL_SPECS, ToolResult, ToolRunner
 from voicedesk.providers.base import (
     Language,
@@ -54,14 +54,23 @@ class Agent:
     tools: ToolRunner
     today: date
     max_tool_rounds: int = 3
+    few_shot: bool = True
     history: list[Message] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if not self.history:
             self.history.append(Message("system", system_prompt(self.today)))
+            if self.few_shot:
+                self.history.extend(few_shot_messages(self.today))
+        self._prefix_len = len(self.history)
+
+    @property
+    def conversation(self) -> list[Message]:
+        """The live call only, without the system prompt and few-shot examples."""
+        return self.history[self._prefix_len :]
 
     async def warmup(self) -> None:
-        await self.llm.warmup(self.history[:1], TOOL_SPECS)
+        await self.llm.warmup(self.history[: self._prefix_len], TOOL_SPECS)
 
     async def run_turn(
         self, user_text: str, language: Language

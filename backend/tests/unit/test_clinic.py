@@ -1,5 +1,6 @@
 import pytest
 
+from voicedesk.agent.prompts import few_shot_messages, system_prompt
 from voicedesk.domain.clinic import (
     ClinicStore,
     ToolError,
@@ -7,7 +8,7 @@ from voicedesk.domain.clinic import (
     normalize_specialty,
     parse_time,
 )
-from voicedesk.domain.faq import search_faq
+from voicedesk.domain.faq import FAQ
 from tests.conftest import TODAY
 
 
@@ -68,19 +69,14 @@ def test_cancel_and_lookup() -> None:
         store.get("9999")
 
 
-@pytest.mark.parametrize(
-    ("question", "lang", "topic"),
-    [
-        ("What time do you open on Saturday?", "en", "hours"),
-        ("Vous acceptez la CNAM ?", "fr", "insurance"),
-        ("وين العنوان متاعكم؟", "ar", "address"),
-        ("Combien coûte une consultation ?", "fr", "prices"),
-    ],
-)
-def test_faq_retrieval(question: str, lang: str, topic: str) -> None:
-    hit = search_faq(question, lang)  # type: ignore[arg-type]
-    assert hit["found"] and hit["topic"] == topic
+def test_system_prompt_carries_every_fact_in_three_languages() -> None:
+    prompt = system_prompt(TODAY)
+    for entry in FAQ:
+        for lang in ("en", "fr", "ar"):
+            assert entry.answers[lang] in prompt  # type: ignore[index]
+    assert "2026-10-28" in prompt  # tomorrow is spelled out for date resolution
 
 
-def test_faq_miss() -> None:
-    assert search_faq("Who won the football match?", "en")["found"] is False
+def test_few_shot_examples_do_not_leak_eval_booking_refs() -> None:
+    text = " ".join(m.content + str(m.tool_calls) for m in few_shot_messages(TODAY))
+    assert not any(ref in text for ref in ("1001", "1002", "1003"))

@@ -1,0 +1,29 @@
+# Local stack: `make models` once (downloads the GGUF into .local/models), then
+#   docker compose up --build
+# and open http://localhost:3000. Microphone access needs localhost or HTTPS.
+services:
+  backend:
+    build: ./backend
+    ports: ["8000:8000"]
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      VOICEDESK_CORS_ORIGINS: '["http://localhost:3000"]'
+    volumes:
+      - ./.local/models:/models:ro
+      - hf-cache:/cache/hf        # faster-whisper weights, downloaded on first start
+      - metrics:/data
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+    ports: ["3000:3000"]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  hf-cache:
+  metrics:

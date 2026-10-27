@@ -45,7 +45,8 @@ async def test_voice_turn_end_to_end(settings: Settings) -> None:
     assert m.tools == ["find_slots"]
     assert m.input_mode == "voice"
     assert all(
-        v is not None and v >= 0 for v in (m.stt_ms, m.llm_ttft_ms, m.tts_ttfb_ms, m.ttfa_ms)
+        v is not None and v >= 0
+        for v in (m.stt_ms, m.llm_ttft_ms, m.tts_ttfb_ms, m.tts_first_chunk_ms, m.ttfa_ms)
     )
     assert m.ttfa_ms <= m.turn_ms  # type: ignore[operator]
     assert rec.audio and rec.audio[0].startswith(b"AUDIO[en]")
@@ -91,7 +92,7 @@ async def test_speech_before_any_answer_is_merged(settings: Settings) -> None:
     finals = [e["text"] for e in rec.events if e["type"] == "transcript" and e.get("final")]
     assert finals[-1] == "I want to cancel booking 1003"
     assert session.completed_turns[-1].tools == ["cancel_appointment"]
-    user_msgs = [m for m in session.agent.history if m.role == "user"]
+    user_msgs = [m for m in session.agent.conversation if m.role == "user"]
     assert len(user_msgs) == 1  # the abandoned partial turn was rolled back
 
 

@@ -285,6 +285,7 @@ class VoiceSession:
                         continue
                     if not st.audio_sent:
                         m.ttfa_ms, m.first_chunk_chars = _ms(t_end), len(chunk)
+                        m.tts_first_chunk_ms = _ms(t0)
                         await self.send.json(
                             {"type": "state", "state": "speaking", "turn_id": m.turn_id}
                         )

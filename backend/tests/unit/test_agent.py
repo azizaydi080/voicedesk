@@ -21,15 +21,15 @@ async def test_tool_loop_runs_tool_then_answers() -> None:
     end = next(e for e in events if isinstance(e, AgentToolEnd))
     assert end.result.ok and end.result.output["status"] == "cancelled"
     assert any(isinstance(e, AgentText) for e in events)
-    roles = [m.role for m in agent.history]
-    assert roles == ["system", "user", "assistant", "tool", "assistant"]
+    roles = [m.role for m in agent.conversation]
+    assert roles == ["user", "assistant", "tool", "assistant"]
     assert agent.tools.store.bookings["1002"].status == "cancelled"
 
 
 async def test_language_note_is_part_of_user_message() -> None:
     agent = make_agent()
     _ = [e async for e in agent.run_turn("Bonjour", "fr")]
-    assert "French" in agent.history[1].content
+    assert "French" in agent.conversation[0].content
 
 
 async def test_interrupted_turn_is_committed_as_partial() -> None:
