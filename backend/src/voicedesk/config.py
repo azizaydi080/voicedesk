@@ -10,7 +10,7 @@ from typing import Literal
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-STTName = Literal["whisper", "deepgram", "fake"]
+STTName = Literal["whisper", "openai_stt", "deepgram", "fake"]
 LLMName = Literal["llamacpp", "openai_compat", "scripted"]
 TTSName = Literal["edge", "elevenlabs", "fake"]
 
@@ -29,17 +29,19 @@ class Settings(BaseSettings):
     whisper_model: str = "small"
     whisper_compute_type: str = "int8"
     whisper_beam_size: int = 1
+    openai_stt_model: str = "whisper-large-v3-turbo"  # uses openai_base_url / openai_api_key
     deepgram_api_key: SecretStr | None = None
     deepgram_model: str = "nova-3"
     deepgram_language: str = "multi"
 
     # --- LLM ----------------------------------------------------------------
     llamacpp_model_path: Path = Path("../.local/models/qwen2.5-1.5b-instruct-q4_k_m.gguf")
-    llamacpp_threads: int | None = None
+    llamacpp_threads: int | None = None  # default: a third of the logical cores
     llamacpp_ctx: int = 4096
     openai_base_url: str = "https://api.groq.com/openai/v1"
     openai_api_key: SecretStr | None = None
-    openai_model: str = "llama-3.3-70b-versatile"
+    openai_model: str = "openai/gpt-oss-20b"
+    openai_reasoning_effort: str | None = "low"  # for reasoning models (gpt-oss); None to omit
     llm_temperature: float = 0.2
     llm_max_tokens: int = 220
     max_tool_rounds: int = 3
@@ -63,6 +65,8 @@ class Settings(BaseSettings):
     clinic_today: date | None = None
     metrics_path: Path = Path("data/metrics.sqlite")
     cors_origins: list[str] = ["http://localhost:3000"]
+    host: str = "0.0.0.0"
+    port: int = 8000
 
 
 @lru_cache

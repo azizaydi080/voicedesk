@@ -1,0 +1,818 @@
+{
+  "run_id": "20261027-163315",
+  "duration_s": 282.1,
+  "config": {
+    "mode": "text",
+    "stage": "all",
+    "stt": null,
+    "llm": "openai_compat:openai/gpt-oss-20b",
+    "commit": null
+  },
+  "summary": {
+    "scenarios": 18,
+    "turns": 23,
+    "language_id_accuracy": 1.0,
+    "tool_call_accuracy": 1.0,
+    "faq_answer_accuracy": 1.0,
+    "reply_language_accuracy": 1.0,
+    "task_success_rate": 1.0,
+    "errors": 0,
+    "llm_ttft_ms_p50": 9504.4,
+    "agent_turn_ms_p50": 10970.7,
+    "by_group": {
+      "en": {
+        "turns": 6,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      },
+      "fr": {
+        "turns": 5,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      },
+      "ar": {
+        "turns": 4,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      },
+      "tn": {
+        "turns": 4,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      },
+      "gulf": {
+        "turns": 1,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      },
+      "mixed": {
+        "turns": 1,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      },
+      "switch": {
+        "turns": 2,
+        "language_id": 1.0,
+        "tool_calls": 1.0,
+        "task_success": 1.0
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "id": "en_book_dentist",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "en_book_dentist",
+          "group": "en",
+          "index": 0,
+          "expected_lang": "en",
+          "user_text": "Hi, I'd like to see a dentist tomorrow morning.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "We have a dentist slot at 11:00 tomorrow morning. Shall I book it for you?",
+          "reply_lang": "en",
+          "tool_calls": [
+            {
+              "name": "find_slots",
+              "arguments": {
+                "date": "2026-10-28",
+                "part_of_day": "morning",
+                "specialty": "dentist"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 412.0,
+          "agent_ms": 10970.7,
+          "error": null,
+          "lang_ok": true
+        },
+        {
+          "scenario": "en_book_dentist",
+          "group": "en",
+          "index": 1,
+          "expected_lang": "en",
+          "user_text": "Eleven is perfect. My name is Sara Haddad and my phone number is 055 512 3456.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "Your appointment is confirmed for 11:00 tomorrow. See you then!",
+          "reply_lang": "en",
+          "tool_calls": [
+            {
+              "name": "book_appointment",
+              "arguments": {
+                "date": "2026-10-28",
+                "patient_name": "Sara Haddad",
+                "phone": "055 512 3456",
+                "specialty": "dentist",
+                "time": "11:00"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 12745.3,
+          "agent_ms": 13807.3,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "en_lookup",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "en_lookup",
+          "group": "en",
+          "index": 0,
+          "expected_lang": "en",
+          "user_text": "Can you check my booking please? The reference is 1003.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "Your general consultation is confirmed for 29 Oct 2026 at 15:00.",
+          "reply_lang": "en",
+          "tool_calls": [
+            {
+              "name": "get_appointment",
+              "arguments": {
+                "booking_ref": "1003"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 9478.2,
+          "agent_ms": 21643.0,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "en_hours",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "en_hours",
+          "group": "en",
+          "index": 0,
+          "expected_lang": "en",
+          "user_text": "What are your opening hours on Saturday?",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "We’re open Saturday from 9 am to 5 pm.",
+          "reply_lang": "en",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 8347.4,
+          "agent_ms": 8365.1,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "en_unavailable_time",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "en_unavailable_time",
+          "group": "en",
+          "index": 0,
+          "expected_lang": "en",
+          "user_text": "Book me with the dentist tomorrow at ten a.m. I'm Omar Khalid, phone 050 123 4567.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "The 10 a.m. slot isn’t free. We have 11 a.m., 1:30 p.m., 2 p.m., or 2:30 p.m. Which would you prefer?",
+          "reply_lang": "en",
+          "tool_calls": [
+            {
+              "name": "book_appointment",
+              "arguments": {
+                "date": "2026-10-28",
+                "patient_name": "Omar Khalid",
+                "phone": "050 123 4567",
+                "specialty": "dentist",
+                "time": "10:00"
+              },
+              "ok": false
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 10881.5,
+          "agent_ms": 21363.0,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "en_out_of_domain",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "en_out_of_domain",
+          "group": "en",
+          "index": 0,
+          "expected_lang": "en",
+          "user_text": "Can you tell me who won the football match yesterday?",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "I’m sorry, I can only help with appointments and clinic information.",
+          "reply_lang": "en",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 10512.1,
+          "agent_ms": 10516.5,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "fr_book_pediatrics",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "fr_book_pediatrics",
+          "group": "fr",
+          "index": 0,
+          "expected_lang": "fr",
+          "user_text": "Bonjour, je voudrais un rendez-vous chez le pédiatre demain après-midi.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Demain après-midi, nous avons des créneaux à 12h, 13h, 13h30 ou 15h. Quel horaire vous convient ?",
+          "reply_lang": "fr",
+          "tool_calls": [
+            {
+              "name": "find_slots",
+              "arguments": {
+                "date": "2026-10-28",
+                "part_of_day": "afternoon",
+                "specialty": "pediatrics"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 12130.3,
+          "agent_ms": 21914.7,
+          "error": null,
+          "lang_ok": true
+        },
+        {
+          "scenario": "fr_book_pediatrics",
+          "group": "fr",
+          "index": 1,
+          "expected_lang": "fr",
+          "user_text": "Quinze heures, c'est parfait. Je m'appelle Claire Martin, mon numéro est le 06 12 34 56 78.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Votre rendez‑vous est confirmé pour le 28 octobre à 15h. À bientôt, Claire.",
+          "reply_lang": "fr",
+          "tool_calls": [
+            {
+              "name": "book_appointment",
+              "arguments": {
+                "date": "2026-10-28",
+                "patient_name": "Claire Martin",
+                "phone": "06 12 34 56 78",
+                "specialty": "pediatrics",
+                "time": "15:00"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 2152.7,
+          "agent_ms": 4939.5,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "fr_cancel",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "fr_cancel",
+          "group": "fr",
+          "index": 0,
+          "expected_lang": "fr",
+          "user_text": "Je voudrais annuler mon rendez-vous, le numéro 1002.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Votre rendez‑vous du 28 octobre à 11h30 avec le dentiste a été annulé.",
+          "reply_lang": "fr",
+          "tool_calls": [
+            {
+              "name": "cancel_appointment",
+              "arguments": {
+                "booking_ref": "1002"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 9672.8,
+          "agent_ms": 10424.6,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "fr_insurance",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "fr_insurance",
+          "group": "fr",
+          "index": 0,
+          "expected_lang": "fr",
+          "user_text": "Est-ce que vous acceptez la CNAM ?",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Oui, nous acceptons la CNAM.",
+          "reply_lang": "fr",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 10968.6,
+          "agent_ms": 10982.5,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "fr_price",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "fr_price",
+          "group": "fr",
+          "index": 0,
+          "expected_lang": "fr",
+          "user_text": "Combien coûte une consultation chez le dermatologue ?",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Une consultation chez le dermatologue coûte 90 dinars.",
+          "reply_lang": "fr",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 490.6,
+          "agent_ms": 504.6,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "ar_book_general",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "ar_book_general",
+          "group": "ar",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "مرحبا، أريد موعدا عند الطبيب العام غدا صباحا.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "المواعيد المتاحة غدًا صباحًا: 09:00، 10:00، 10:30، 11:00. ما اسمك ورقم هاتفك؟",
+          "reply_lang": "ar",
+          "tool_calls": [
+            {
+              "name": "find_slots",
+              "arguments": {
+                "date": "2026-10-28",
+                "part_of_day": "morning",
+                "specialty": "general"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 9411.1,
+          "agent_ms": 20853.4,
+          "error": null,
+          "lang_ok": true
+        },
+        {
+          "scenario": "ar_book_general",
+          "group": "ar",
+          "index": 1,
+          "expected_lang": "ar",
+          "user_text": "الساعة العاشرة مناسبة. اسمي أحمد بن علي ورقم هاتفي ٠٥٠١٢٣٤٥٦٧.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "تم تأكيد موعدك مع الطبيب العام في 28 أكتوبر 2026 الساعة 10:00. رقم الحجز هو 1004.",
+          "reply_lang": "ar",
+          "tool_calls": [
+            {
+              "name": "book_appointment",
+              "arguments": {
+                "date": "2026-10-28",
+                "patient_name": "أحمد بن علي",
+                "phone": "0501234567",
+                "specialty": "general",
+                "time": "10:00"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 1549.3,
+          "agent_ms": 14058.2,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "ar_lookup",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "ar_lookup",
+          "group": "ar",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "أريد أن أعرف تفاصيل موعدي، رقم الحجز ١٠٠١.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "حجزك 1001 مع طبيب الجلدية يوم 28 أكتوبر 2026 الساعة 10:00، مؤكّد.",
+          "reply_lang": "ar",
+          "tool_calls": [
+            {
+              "name": "get_appointment",
+              "arguments": {
+                "booking_ref": "1001"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 10623.3,
+          "agent_ms": 21179.5,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "ar_address",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "ar_address",
+          "group": "ar",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "ما هو عنوان العيادة؟",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "عنواننا هو 12 شارع الحبيب بورقيبة، تونس، بجانب الصيدلية المركزية.",
+          "reply_lang": "ar",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 621.3,
+          "agent_ms": 644.7,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "tn_hours",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "tn_hours",
+          "group": "tn",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "وقتاش تحلّو العيادة نهار السبت؟",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "نفتح من 9 صباحًا حتى 5 مساءً يوم السبت.",
+          "reply_lang": "ar",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 10697.8,
+          "agent_ms": 10715.8,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "tn_cancel",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "tn_cancel",
+          "group": "tn",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "نحب نبطّل الموعد متاعي، النومرو ١٠٠٣.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "تم إلغاء موعدك رقم 1003. هل تحتاج مساعدة أخرى؟",
+          "reply_lang": "ar",
+          "tool_calls": [
+            {
+              "name": "cancel_appointment",
+              "arguments": {
+                "booking_ref": "1003"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 9504.4,
+          "agent_ms": 20837.2,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "tn_book_dentist",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "tn_book_dentist",
+          "group": "tn",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "عسلامة، نحب موعد عند طبيب السنان غدوة العشية.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "المواعيد المتاحة غدًا بعد الظهر: 13:30، 14:00، 14:30، 15:30. ما اسمك ورقم هاتفك؟",
+          "reply_lang": "ar",
+          "tool_calls": [
+            {
+              "name": "find_slots",
+              "arguments": {
+                "date": "2026-10-28",
+                "part_of_day": "afternoon",
+                "specialty": "dentist"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 9788.9,
+          "agent_ms": 21517.7,
+          "error": null,
+          "lang_ok": true
+        },
+        {
+          "scenario": "tn_book_dentist",
+          "group": "tn",
+          "index": 1,
+          "expected_lang": "ar",
+          "user_text": "الساعة جوج ونص باهي. إسمي سنية التريكي والنومرو متاعي ٢٢٣٣٤٤٥٥.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "تم تأكيد موعدك في 28 أكتوبر 2026 الساعة 14:30 مع طبيب الأسنان. رقم الحجز هو 1004. نراكم هناك.",
+          "reply_lang": "ar",
+          "tool_calls": [
+            {
+              "name": "book_appointment",
+              "arguments": {
+                "date": "2026-10-28",
+                "patient_name": "سنية التريكي",
+                "phone": "223334455",
+                "specialty": "dentist",
+                "time": "14:30"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 1517.0,
+          "agent_ms": 4891.0,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "gulf_parking",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "gulf_parking",
+          "group": "gulf",
+          "index": 0,
+          "expected_lang": "ar",
+          "user_text": "عندكم مواقف سيارات عند العيادة؟",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "ar",
+          "reply": "نعم، يوجد موقف سيارات مجاني خلف المبنى.",
+          "reply_lang": "ar",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 10580.8,
+          "agent_ms": 10611.0,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "mixed_fr_ar_cancel",
+      "success": true,
+      "state_ok": true,
+      "turns": [
+        {
+          "scenario": "mixed_fr_ar_cancel",
+          "group": "mixed",
+          "index": 0,
+          "expected_lang": "fr",
+          "user_text": "Bonjour, je veux annuler le rendez-vous 1001 s'il vous plaît, شكرا.",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Votre rendez‑vous 1001 a bien été annulé. Bonne journée.",
+          "reply_lang": "fr",
+          "tool_calls": [
+            {
+              "name": "cancel_appointment",
+              "arguments": {
+                "booking_ref": "1001"
+              },
+              "ok": true
+            }
+          ],
+          "tools_ok": true,
+          "answer_ok": null,
+          "llm_ttft_ms": 785.0,
+          "agent_ms": 11374.6,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    },
+    {
+      "id": "switch_en_to_fr",
+      "success": true,
+      "state_ok": null,
+      "turns": [
+        {
+          "scenario": "switch_en_to_fr",
+          "group": "switch",
+          "index": 0,
+          "expected_lang": "en",
+          "user_text": "Hello, are you open on Sundays?",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "en",
+          "reply": "We’re closed on Sundays.",
+          "reply_lang": "en",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 355.3,
+          "agent_ms": 364.6,
+          "error": null,
+          "lang_ok": true
+        },
+        {
+          "scenario": "switch_en_to_fr",
+          "group": "switch",
+          "index": 1,
+          "expected_lang": "fr",
+          "user_text": "Et le samedi, vous fermez à quelle heure ?",
+          "transcript": null,
+          "stt_language": null,
+          "stt_ms": null,
+          "cer": null,
+          "detected_lang": "fr",
+          "reply": "Nous sommes ouverts le samedi jusqu’à 17h.",
+          "reply_lang": "fr",
+          "tool_calls": [],
+          "tools_ok": true,
+          "answer_ok": true,
+          "llm_ttft_ms": 9545.2,
+          "agent_ms": 9572.0,
+          "error": null,
+          "lang_ok": true
+        }
+      ]
+    }
+  ]
+}

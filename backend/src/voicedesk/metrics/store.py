@@ -39,6 +39,7 @@ class TurnMetrics:
     llm_rounds: int = 0
     prompt_tokens: int | None = None
     cached_tokens: int | None = None
+    llm_throttled_ms: float = 0.0  # rate-limit back-off, included in the latencies below
     first_chunk_chars: int | None = None
     # Latencies in ms. ttfa = end of caller speech (endpoint fired) -> first audio byte sent.
     stt_ms: float | None = None

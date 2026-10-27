@@ -36,6 +36,7 @@ class TurnResult:
     tools_ok: bool | None = None
     answer_ok: bool | None = None
     llm_ttft_ms: float | None = None
+    llm_throttled_ms: float = 0.0
     agent_ms: float | None = None
     error: str | None = None
 
@@ -118,8 +119,11 @@ async def run_scenario(
                                 "ok": ev.result.ok,
                             }
                         )
-                    elif isinstance(ev, AgentLLMRound) and ev.round == 0 and ev.ttft_ms:
-                        r.llm_ttft_ms = round(ev.ttft_ms, 1)
+                    elif isinstance(ev, AgentLLMRound):
+                        r.llm_throttled_ms += round(ev.throttled_ms, 1)
+                        if ev.round == 0 and ev.ttft_ms:
+                            # Report model latency without rate-limit back-off.
+                            r.llm_ttft_ms = round(ev.ttft_ms - ev.throttled_ms, 1)
                 r.agent_ms = round((time.perf_counter() - t0) * 1000, 1)
                 r.reply = "".join(reply).strip()
                 r.reply_lang = detect_language(r.reply).language if r.reply else None
@@ -156,6 +160,8 @@ def aggregate(results: list[ScenarioResult], with_agent: bool) -> dict[str, Any]
             "errors": sum(1 for t in turns if t.error),
             "llm_ttft_ms_p50": percentile([t.llm_ttft_ms for t in turns if t.llm_ttft_ms], 50),
             "agent_turn_ms_p50": percentile([t.agent_ms for t in turns if t.agent_ms], 50),
+            "llm_ttft_ms_p90": percentile([t.llm_ttft_ms for t in turns if t.llm_ttft_ms], 90),
+            "rate_limit_wait_s": round(sum(t.llm_throttled_ms for t in turns) / 1000, 1),
         }
     groups: dict[str, Any] = {}
     for g in dict.fromkeys(s.group for s in results):

@@ -3,8 +3,10 @@ Ollama, vLLM or a llama.cpp server. Streams text and accumulates streamed tool c
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import json
+import time
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -52,11 +54,15 @@ class OpenAICompatLLM:
         temperature: float = 0.2,
         max_tokens: int = 220,
         client: httpx.AsyncClient | None = None,
+        reasoning_effort: str | None = None,
+        max_retries: int = 3,
     ) -> None:
         self.name = f"openai_compat:{model}"
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
+        self.reasoning_effort = reasoning_effort
+        self.max_retries = max_retries
         headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
         self._client = client or httpx.AsyncClient(
             base_url=base_url.rstrip("/"), headers=headers, timeout=httpx.Timeout(30.0)
@@ -82,12 +88,28 @@ class OpenAICompatLLM:
         }
         if tools:
             body["tools"] = [t.as_openai() for t in tools]
+        if self.reasoning_effort and "gpt-oss" in self.model:
+            body["reasoning_effort"] = self.reasoning_effort
         pending: dict[int, dict[str, str]] = {}
         usage: dict[str, Any] = {}
-        async with self._client.stream("POST", "/chat/completions", json=body) as resp:
-            if resp.status_code >= 400:
-                detail = (await resp.aread()).decode(errors="replace")[:500]
-                raise RuntimeError(f"LLM HTTP {resp.status_code}: {detail}")
+        throttled = 0.0
+        async with contextlib.AsyncExitStack() as stack:
+            for attempt in range(self.max_retries + 1):
+                resp = await stack.enter_async_context(
+                    self._client.stream("POST", "/chat/completions", json=body)
+                )
+                if resp.status_code == 429 and attempt < self.max_retries:
+                    # Free tiers rate-limit; honour Retry-After (capped) and try again.
+                    wait = min(float(resp.headers.get("retry-after", 2**attempt)), 20.0)
+                    await resp.aclose()
+                    t0 = time.perf_counter()
+                    await asyncio.sleep(wait)
+                    throttled += (time.perf_counter() - t0) * 1000
+                    continue
+                if resp.status_code >= 400:
+                    detail = (await resp.aread()).decode(errors="replace")[:500]
+                    raise RuntimeError(f"LLM HTTP {resp.status_code}: {detail}")
+                break
             async for line in resp.aiter_lines():
                 if not line.startswith("data:"):
                     continue
@@ -119,5 +141,8 @@ class OpenAICompatLLM:
             yield ToolCallsReady(calls)
         details = usage.get("prompt_tokens_details") or {}
         yield LLMDone(
-            usage.get("prompt_tokens"), usage.get("completion_tokens"), details.get("cached_tokens")
+            usage.get("prompt_tokens"),
+            usage.get("completion_tokens"),
+            details.get("cached_tokens"),
+            throttled,
         )

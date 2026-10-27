@@ -145,3 +145,20 @@ async def test_openai_compat_text_and_http_errors() -> None:
     )
     with pytest.raises(RuntimeError, match="429"):
         _ = [e async for e in OpenAICompatLLM("http://llm", "m", client=bad).stream([], [])]
+
+
+async def test_openai_compat_retries_rate_limits_then_streams() -> None:
+    calls = {"n": 0}
+    ok = _sse({"choices": [{"delta": {"content": "ok"}}]})
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(429, headers={"retry-after": "0"}, content=b"slow down")
+        assert json.loads(request.content)["reasoning_effort"] == "low"
+        return httpx.Response(200, content=ok)
+
+    client = httpx.AsyncClient(base_url="http://llm", transport=httpx.MockTransport(handler))
+    llm = OpenAICompatLLM("http://llm", "openai/gpt-oss-20b", client=client, reasoning_effort="low")
+    texts = [e.text async for e in llm.stream([], []) if isinstance(e, TextDelta)]
+    assert texts == ["ok"] and calls["n"] == 2

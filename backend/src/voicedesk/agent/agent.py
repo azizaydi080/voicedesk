@@ -43,6 +43,7 @@ class AgentLLMRound:
     total_ms: float
     prompt_tokens: int | None
     cached_tokens: int | None
+    throttled_ms: float = 0.0
 
 
 AgentEvent = AgentText | AgentToolStart | AgentToolEnd | AgentLLMRound
@@ -105,6 +106,7 @@ class Agent:
                     (time.perf_counter() - t0) * 1000,
                     usage.prompt_tokens,
                     usage.cached_tokens,
+                    usage.throttled_ms,
                 )
                 if not calls:
                     finished = True

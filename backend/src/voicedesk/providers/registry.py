@@ -28,6 +28,11 @@ def build_stt(s: Settings) -> STTProvider:
             from voicedesk.providers.stt_whisper import WhisperSTT
 
             return WhisperSTT(s.whisper_model, s.whisper_compute_type, s.whisper_beam_size)
+        case "openai_stt":
+            from voicedesk.providers.stt_openai_compat import OpenAICompatSTT
+
+            key = s.openai_api_key.get_secret_value() if s.openai_api_key else None
+            return OpenAICompatSTT(s.openai_base_url, s.openai_stt_model, key)
         case "deepgram":
             from voicedesk.providers.stt_deepgram import DeepgramSTT
 
@@ -56,7 +61,12 @@ def build_llm(s: Settings) -> LLMProvider:
 
             key = s.openai_api_key.get_secret_value() if s.openai_api_key else None
             return OpenAICompatLLM(
-                s.openai_base_url, s.openai_model, key, s.llm_temperature, s.llm_max_tokens
+                s.openai_base_url,
+                s.openai_model,
+                key,
+                s.llm_temperature,
+                s.llm_max_tokens,
+                reasoning_effort=s.openai_reasoning_effort,
             )
         case "scripted":
             from voicedesk.providers.fakes import ScriptedLLM

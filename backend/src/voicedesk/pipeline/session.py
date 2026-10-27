@@ -260,6 +260,7 @@ class VoiceSession:
                                 )
                             elif isinstance(ev, AgentLLMRound):
                                 m.llm_rounds += 1
+                                m.llm_throttled_ms += round(ev.throttled_ms, 1)
                                 if ev.round == 0:
                                     m.llm_ttft_ms = round(ev.ttft_ms, 1) if ev.ttft_ms else None
                                     m.prompt_tokens, m.cached_tokens = (

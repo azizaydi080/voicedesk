@@ -157,7 +157,7 @@ class LlamaCppLLM:
         self._llm: Any = Llama(
             model_path=str(model_path),
             n_ctx=n_ctx,
-            n_threads=n_threads or max(1, (os.cpu_count() or 4) // 2),
+            n_threads=n_threads or max(1, (os.cpu_count() or 4) // 3),
             verbose=False,
         )
         self._lock = asyncio.Lock()

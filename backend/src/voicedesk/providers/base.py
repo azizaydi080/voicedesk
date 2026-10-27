@@ -101,6 +101,7 @@ class LLMDone:
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
     cached_tokens: int | None = None
+    throttled_ms: float = 0.0  # time spent backing off from provider rate limits
 
 
 LLMEvent = TextDelta | ToolCallsReady | LLMDone
