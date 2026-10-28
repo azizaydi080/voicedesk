@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from voicedesk.config import Settings
-from voicedesk.providers.base import LLMProvider, STTProvider, TTSProvider
+from voicedesk.providers.base import Language, LLMProvider, STTProvider, TTSProvider
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,7 +84,12 @@ def build_tts(s: Settings) -> TTSProvider:
             from voicedesk.providers.tts import ElevenLabsTTS
 
             key = _require(s.elevenlabs_api_key, "VOICEDESK_ELEVENLABS_API_KEY")
-            return ElevenLabsTTS(key, s.elevenlabs_voice_id, s.elevenlabs_model)
+            voices: dict[Language, str] = {
+                "ar": s.elevenlabs_voice_id_ar or s.elevenlabs_voice_id,
+                "fr": s.elevenlabs_voice_id_fr or s.elevenlabs_voice_id,
+                "en": s.elevenlabs_voice_id_en or s.elevenlabs_voice_id,
+            }
+            return ElevenLabsTTS(key, voices, s.elevenlabs_model)
         case "fake":
             from voicedesk.providers.fakes import FakeTTS
 

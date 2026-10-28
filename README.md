@@ -194,14 +194,39 @@ Provider presets (`backend/.env`):
 | Hosted, fast (measured above) | `VOICEDESK_STT=openai_stt` `VOICEDESK_LLM=openai_compat` `VOICEDESK_OPENAI_API_KEY=<groq key>` | free Groq tier works, with rate limits |
 | Fully local, no keys | defaults (`whisper` + `llamacpp`) | runs offline except edge-tts; slow on CPU (see below) |
 | Streaming STT | `VOICEDESK_STT=deepgram` `VOICEDESK_DEEPGRAM_API_KEY=…` | implemented, not benchmarked here |
-| Premium TTS | `VOICEDESK_TTS=elevenlabs` `VOICEDESK_ELEVENLABS_API_KEY=…` | implemented, not benchmarked here |
+| Premium TTS | `VOICEDESK_TTS=elevenlabs` `VOICEDESK_ELEVENLABS_API_KEY=…` | implemented and unit-tested, not benchmarked yet |
+
+**ElevenLabs TTS** streams from `POST /v1/text-to-speech/{voice_id}/stream` in the same
+24 kHz / 48 kbps MP3 as edge-tts, so clause-level streaming and the browser path are
+unchanged. edge-tts stays the default; ElevenLabs is opt-in:
+
+| Variable | Default | Notes |
+|---|---|---|
+| `VOICEDESK_TTS` | `edge` | set to `elevenlabs` to enable it |
+| `VOICEDESK_ELEVENLABS_API_KEY` | — | required when selected; the server refuses to start without it |
+| `VOICEDESK_ELEVENLABS_MODEL` | `eleven_flash_v2_5` | lowest-latency multilingual model; `eleven_multilingual_v2` for quality |
+| `VOICEDESK_ELEVENLABS_VOICE_ID` | `21m00Tcm4TlvDq8ikWAM` | one voice for Arabic, French and English |
+| `VOICEDESK_ELEVENLABS_VOICE_ID_AR` / `_FR` / `_EN` | — | optional voice per language, like the edge-tts voices |
+
+The session's detected language is sent as `language_code` (ignored by
+`eleven_multilingual_v2`, so it is omitted there). To benchmark it against the edge-tts run
+above, with the same STT and LLM:
+
+```bash
+# backend/.env: VOICEDESK_STT=openai_stt VOICEDESK_LLM=openai_compat VOICEDESK_TTS=elevenlabs + both keys
+make dev-backend
+cd backend && uv run --frozen python -m voicedesk.bench --repeat 2 --tag groq-elevenlabs
+```
+
+This writes `docs/benchmarks/bench-groq-elevenlabs.json`. **Results pending:** no
+ElevenLabs numbers are reported here until that run has been made with a real key.
 
 Or with Docker: `make models && docker compose up --build`.
 
 ### Checks, evals and benchmarks
 
 ```bash
-make check         # ruff, ruff format, mypy --strict, tsc, 61 pytest + 4 vitest tests
+make check         # ruff, ruff format, mypy --strict, tsc, 73 pytest + 4 vitest tests
 make evals-stt     # STT + language ID on the audio fixtures (no LLM)
 make evals         # agent on scripted conversations (text in)
 make evals-audio   # audio fixtures → STT → language ID → agent → state checks
@@ -227,7 +252,7 @@ the slower local-LLM agent eval runs weekly, on demand, or with an `evals` PR la
   takes 3-4 s per utterance and the 1.5B LLM several seconds per round, so the fully
   local mode is a no-key demo and a privacy option, not a real-time configuration. Apple
   Silicon or a GPU changes this; not measured here.
-- **Not measured:** Deepgram streaming STT and ElevenLabs TTS (no keys available),
+- **Not measured:** Deepgram streaming STT and ElevenLabs TTS (unit-tested; no benchmark run with a key yet),
   `docker compose` (no Docker on the build machine) and the GitHub Actions workflow (not
   yet pushed). gpt-oss-120b was tried but hit the free tier's organisation rate limit, so
   no result is reported for it.

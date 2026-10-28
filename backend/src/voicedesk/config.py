@@ -51,8 +51,11 @@ class Settings(BaseSettings):
     edge_voice_fr: str = "fr-FR-DeniseNeural"
     edge_voice_en: str = "en-US-AriaNeural"
     elevenlabs_api_key: SecretStr | None = None
-    elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"
-    elevenlabs_model: str = "eleven_flash_v2_5"
+    elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"  # used for every language unless overridden
+    elevenlabs_voice_id_ar: str | None = None
+    elevenlabs_voice_id_fr: str | None = None
+    elevenlabs_voice_id_en: str | None = None
+    elevenlabs_model: str = "eleven_flash_v2_5"  # or eleven_multilingual_v2 for quality
 
     # --- turn taking --------------------------------------------------------
     vad_threshold_db: float = Field(default=12.0, description="dB above noise floor = speech")
