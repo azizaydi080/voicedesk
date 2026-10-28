@@ -29,9 +29,7 @@ export default function Home() {
     <div className="page">
       <header className="top">
         <div>
-          <h1>
-            VoiceDesk
-          </h1>
+          <h1>VoiceDesk</h1>
           <p className="muted">Ennour Clinic receptionist · العربية · Français · English</p>
         </div>
         <nav>

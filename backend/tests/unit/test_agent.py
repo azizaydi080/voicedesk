@@ -1,11 +1,11 @@
 import asyncio
 import contextlib
 
+from tests.conftest import TODAY
 from voicedesk.agent.agent import Agent, AgentLLMRound, AgentText, AgentToolEnd, AgentToolStart
 from voicedesk.domain.clinic import ClinicStore
 from voicedesk.domain.tools import ToolRunner
 from voicedesk.providers.fakes import ScriptedLLM
-from tests.conftest import TODAY
 
 
 def make_agent(delay: float = 0.0) -> Agent:

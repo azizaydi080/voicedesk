@@ -1,5 +1,5 @@
-from voicedesk.bench import speech_end_offset_s, summarize_rows
 from tests.conftest import silence, tone
+from voicedesk.bench import speech_end_offset_s, summarize_rows
 
 
 def test_speech_end_ignores_trailing_silence() -> None:

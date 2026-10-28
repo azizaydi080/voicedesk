@@ -3,8 +3,8 @@ import wave
 
 import httpx
 
-from voicedesk.providers.stt_openai_compat import OpenAICompatSTT
 from tests.conftest import tone
+from voicedesk.providers.stt_openai_compat import OpenAICompatSTT
 
 
 async def test_posts_wav_and_maps_language() -> None:

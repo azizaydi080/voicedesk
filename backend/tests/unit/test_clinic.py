@@ -1,5 +1,6 @@
 import pytest
 
+from tests.conftest import TODAY
 from voicedesk.agent.prompts import few_shot_messages, system_prompt
 from voicedesk.domain.clinic import (
     ClinicStore,
@@ -9,7 +10,6 @@ from voicedesk.domain.clinic import (
     parse_time,
 )
 from voicedesk.domain.faq import FAQ
-from tests.conftest import TODAY
 
 
 @pytest.mark.parametrize(

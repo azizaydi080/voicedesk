@@ -1,5 +1,5 @@
-from voicedesk.audio.vad import FRAME_MS, EnergyVAD, VadEvent
 from tests.conftest import silence, tone
+from voicedesk.audio.vad import FRAME_MS, EnergyVAD, VadEvent
 
 
 def events(vad: EnergyVAD, pcm: bytes) -> list[tuple[int, VadEvent]]:

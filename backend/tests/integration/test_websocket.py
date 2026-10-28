@@ -5,12 +5,12 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
+from tests.conftest import silence, tone
 from voicedesk.api.app import create_app
 from voicedesk.config import Settings
 from voicedesk.providers.base import Transcript
 from voicedesk.providers.fakes import FakeSTT, FakeTTS, ScriptedLLM
 from voicedesk.providers.registry import Providers
-from tests.conftest import silence, tone
 
 pytestmark = pytest.mark.integration
 
